@@ -112,7 +112,8 @@ class TrainYoloV8Seg(dnntrain.TrainProcess):
         self.begin_task_run()
 
         # Create a YOLO model instance
-        self.device = 1 if torch.cuda.is_available() else torch.device("cpu")
+        self.device = torch.device(
+            "cuda") if torch.cuda.is_available() else torch.device("cpu")
         if param.cfg["config_file"]:
             # Load the YAML config file
             with open(param.cfg["config_file"], 'r') as file:

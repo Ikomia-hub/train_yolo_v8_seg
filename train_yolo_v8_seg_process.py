@@ -27,6 +27,7 @@ from ultralytics import YOLO
 from datetime import datetime
 import torch
 from train_yolo_v8_seg.utils import custom_callbacks
+from ultralytics import download
 
 
 # --------------------
@@ -86,12 +87,13 @@ class TrainYoloV8Seg(dnntrain.TrainProcess):
             self.set_param_object(TrainYoloV8SegParam())
         else:
             self.set_param_object(copy.deepcopy(param))
-            self.enable_mlflow(False)
-            self.enable_tensorboard(False)
-            self.device = torch.device("cpu")
-            self.model_name_file = None
-            self.model = None
-            self.stop_training = False
+
+        self.device = torch.device("cpu")
+        self.model_weights = None
+        self.model = None
+        self.stop_training = False
+        self.repo = 'ultralytics/assets'
+        self.version = 'v0.0.0'
 
     def get_progress_steps(self):
         # Function returning the number of progress steps for this process
@@ -108,20 +110,24 @@ class TrainYoloV8Seg(dnntrain.TrainProcess):
         dataset_yaml = prepare_dataset(dataset_input, param.cfg["dataset_folder"],
                                        param.cfg["dataset_split_ratio"])
 
-        # Call begin_task_run() for initialization
-        self.begin_task_run()
-
         # Create a YOLO model instance
         self.device = 0 if torch.cuda.is_available() else torch.device("cpu")
-        if param.cfg["config_file"]:
+        if param.cfg["config_file"] != "":
             # Load the YAML config file
             with open(param.cfg["config_file"], 'r') as file:
                 config_file = yaml.safe_load(file)
-            self.model_name_file = config_file["model"]
+            self.model_weights = config_file["model"]
         else:
-            self.model_name_file = param.cfg["model_name"] + ".pt"
-
-        self.model = YOLO(self.model_name_file)
+            # Set path
+            model_folder = os.path.join(os.path.dirname(
+                os.path.realpath(__file__)), "weights")
+            self.model_weights = os.path.join(
+                str(model_folder), f'{param.cfg["model_name"]}.pt')
+            # Download model if not exist
+            if not os.path.isfile(self.model_weights):
+                url = f'https://github.com/{self.repo}/releases/download/{self.version}/{param.cfg["model_name"]}.pt'
+                download(url=url, dir=model_folder, unzip=True)
+        self.model = YOLO(self.model_weights)
 
         # Add custom MLflow callback to the model
         self.model.add_callback(
@@ -186,7 +192,7 @@ class TrainYoloV8SegFactory(dataprocess.CTaskFactory):
                                 "The YOLOv8 models have been pretained on the COCO dataset."
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Instance Segmentation"
-        self.info.version = "1.0.0"
+        self.info.version = "1.0.1"
         self.info.icon_path = "icons/icon.png"
         self.info.authors = "Jocher, G., Chaurasia, A., & Qiu, J"
         self.info.article = "YOLO by Ultralytics"

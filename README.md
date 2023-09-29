@@ -21,7 +21,7 @@
 
 Train YOLOv8 instance segmentation models.
 
-![Desk object detection](https://raw.githubusercontent.com/Ikomia-hub/train_yolo_v8_seg/feat/new_readme/icons/output.jpg)
+![Desk object detection](https://raw.githubusercontent.com/Ikomia-hub/train_yolo_v8_seg/main/icons/output.jpg)
 
 ## :rocket: Use with Ikomia API
 

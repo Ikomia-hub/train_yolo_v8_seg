@@ -27,7 +27,10 @@ from ultralytics import YOLO
 from datetime import datetime
 import torch
 from train_yolo_v8_seg.utils import custom_callbacks
-from ultralytics import download
+from ultralytics import download, settings
+
+# Update a setting
+settings.update({'mlflow': True})
 
 
 # --------------------
@@ -162,6 +165,9 @@ class TrainYoloV8Seg(dnntrain.TrainProcess):
                 device=self.device,
                 project=output_folder,
             )
+
+        # Reset settings to default values
+        settings.reset()
 
         # Step progress bar (Ikomia Studio):
         self.emit_step_progress()

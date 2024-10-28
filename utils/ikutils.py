@@ -3,8 +3,11 @@ import shutil
 import yaml
 import os
 
+
 def prepare_dataset(ikdataset, dataset_folder, split_ratio):
-    _dataset_exists(ikdataset, dataset_folder, split_ratio)
+    if _dataset_exists(ikdataset, dataset_folder, split_ratio):
+        return dataset_folder + os.sep + "dataset.yaml"
+
     train_img_folder = dataset_folder + os.sep + "images" + os.sep + "train"
     val_img_folder = dataset_folder + os.sep + "images" + os.sep + "val"
     train_label_folder = dataset_folder + os.sep + "labels" + os.sep + "train"
@@ -23,17 +26,25 @@ def prepare_dataset(ikdataset, dataset_folder, split_ratio):
         src_filename = img["filename"]
 
         if index in val_indices:
-            dst_filename = val_img_folder + os.sep + os.path.basename(src_filename)
+            dst_filename = val_img_folder + os.sep + \
+                os.path.basename(src_filename)
             shutil.copy(src_filename, dst_filename)
-            dst_filename = dst_filename.replace("images" + os.sep + "val", "labels" + os.sep + "val", 1)
-            dst_filename = dst_filename.replace('.' + dst_filename.split('.')[-1], '.txt')
-            _create_image_labels(dst_filename, img["annotations"], img["width"], img["height"])
+            dst_filename = dst_filename.replace(
+                "images" + os.sep + "val", "labels" + os.sep + "val", 1)
+            dst_filename = dst_filename.replace(
+                '.' + dst_filename.split('.')[-1], '.txt')
+            _create_image_labels(
+                dst_filename, img["annotations"], img["width"], img["height"])
         else:
-            dst_filename = train_img_folder + os.sep + os.path.basename(src_filename)
+            dst_filename = train_img_folder + \
+                os.sep + os.path.basename(src_filename)
             shutil.copy(src_filename, dst_filename)
-            dst_filename = dst_filename.replace("images" + os.sep + "train", "labels" + os.sep + "train", 1)
-            dst_filename = dst_filename.replace('.' + dst_filename.split('.')[-1], '.txt')
-            _create_image_labels(dst_filename, img["annotations"], img["width"], img["height"])
+            dst_filename = dst_filename.replace(
+                "images" + os.sep + "train", "labels" + os.sep + "train", 1)
+            dst_filename = dst_filename.replace(
+                '.' + dst_filename.split('.')[-1], '.txt')
+            _create_image_labels(
+                dst_filename, img["annotations"], img["width"], img["height"])
 
         index += 1
 
